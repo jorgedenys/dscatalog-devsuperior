@@ -1,6 +1,7 @@
 package com.jdsjara.dscatalog.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.jdsjara.dscatalog.dto.CategoryDTO;
 import com.jdsjara.dscatalog.entities.Category;
 import com.jdsjara.dscatalog.repositories.CategoryRepository;
+import com.jdsjara.dscatalog.services.exceptions.ResourceNotFoundException;
 
 @Service
 public class CategoryService {
@@ -26,5 +28,20 @@ public class CategoryService {
 				.map(x -> new CategoryDTO(x))
 				.collect(Collectors.toList());
 	}
+	
+	@Transactional(readOnly = true)
+	public CategoryDTO findById(Long id) {
+		Optional<Category> obj = repository.findById(id);
+		Category entity = obj.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+		return new CategoryDTO(entity);
+	}
 
+	@Transactional
+	public CategoryDTO insert(CategoryDTO dto) {
+		Category entity = new Category();
+		entity.setName(dto.getName());
+		entity = repository.save(entity);
+		return new CategoryDTO(entity);
+	}
+	
 }
