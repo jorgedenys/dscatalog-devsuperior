@@ -12,49 +12,49 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.jdsjara.dscatalog.dto.CategoryDTO;
-import com.jdsjara.dscatalog.entities.Category;
-import com.jdsjara.dscatalog.repositories.CategoryRepository;
+import com.jdsjara.dscatalog.dto.ProductDTO;
+import com.jdsjara.dscatalog.entities.Product;
+import com.jdsjara.dscatalog.repositories.ProductRepository;
 import com.jdsjara.dscatalog.services.exceptions.DatabaseException;
 import com.jdsjara.dscatalog.services.exceptions.ResourceNotFoundException;
 
 @Service
-public class CategoryService {
+public class ProductService {
 	
 	@Autowired
-	private CategoryRepository repository;
+	private ProductRepository repository;
 	
 	@Transactional(readOnly = true)
-	public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
-		Page<Category> list = repository.findAll(pageRequest);
-		return list.map(x -> new CategoryDTO(x));
+	public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
+		Page<Product> list = repository.findAll(pageRequest);
+		return list.map(x -> new ProductDTO(x));
 	}
 	
 	@Transactional(readOnly = true)
-	public CategoryDTO findById(Long id) {
-		Optional<Category> obj = repository.findById(id);
-		Category entity = obj.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
-		return new CategoryDTO(entity);
+	public ProductDTO findById(Long id) {
+		Optional<Product> obj = repository.findById(id);
+		Product entity = obj.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+		return new ProductDTO(entity, entity.getCategories());
 	}
 
 	@Transactional
-	public CategoryDTO insert(CategoryDTO dto) {
-		Category entity = new Category();
+	public ProductDTO insert(ProductDTO dto) {
+		Product entity = new Product();
 		entity.setName(dto.getName());
 		entity = repository.save(entity);
-		return new CategoryDTO(entity);
+		return new ProductDTO(entity);
 	}
 
 	@Transactional
-	public CategoryDTO update(Long id, CategoryDTO dto) {
+	public ProductDTO update(Long id, ProductDTO dto) {
 		// Em versões mais recentes do Spring Boot, o nome da função mudou para: getReferenceById
 		// Esse comando não realiza consulta no BD, ele instancia um objeto com os dados que serão
 		// atualizados. A conexão com o BD será aberta apenas uma vez e com o método SAVE do repository
 		try {
-			Category entity = repository.getOne(id);
+			Product entity = repository.getOne(id);
 			entity.setName(dto.getName());
 			entity = repository.save(entity);
-			return new CategoryDTO(entity);	
+			return new ProductDTO(entity);	
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Id não encontrado: " + id);
 		}
