@@ -12,8 +12,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.jdsjara.dscatalog.dto.CategoryDTO;
 import com.jdsjara.dscatalog.dto.ProductDTO;
+import com.jdsjara.dscatalog.entities.Category;
 import com.jdsjara.dscatalog.entities.Product;
+import com.jdsjara.dscatalog.repositories.CategoryRepository;
 import com.jdsjara.dscatalog.repositories.ProductRepository;
 import com.jdsjara.dscatalog.services.exceptions.DatabaseException;
 import com.jdsjara.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -23,6 +26,9 @@ public class ProductService {
 	
 	@Autowired
 	private ProductRepository repository;
+	
+	@Autowired
+	private CategoryRepository categoryRepository;
 	
 	@Transactional(readOnly = true)
 	public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
@@ -40,7 +46,7 @@ public class ProductService {
 	@Transactional
 	public ProductDTO insert(ProductDTO dto) {
 		Product entity = new Product();
-		entity.setName(dto.getName());
+		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
 		return new ProductDTO(entity);
 	}
@@ -52,7 +58,7 @@ public class ProductService {
 		// atualizados. A conexão com o BD será aberta apenas uma vez e com o método SAVE do repository
 		try {
 			Product entity = repository.getOne(id);
-			entity.setName(dto.getName());
+			copyDtoToEntity(dto, entity);
 			entity = repository.save(entity);
 			return new ProductDTO(entity);	
 		} catch (EntityNotFoundException e) {
@@ -70,6 +76,22 @@ public class ProductService {
 		catch (DataIntegrityViolationException e) {
 			throw new DatabaseException("Violação de Integridade.");
 		}
+	}
+	
+	private void copyDtoToEntity(ProductDTO dto, Product entity) {
+
+		entity.setName(dto.getName());
+		entity.setDescription(dto.getDescription());
+		entity.setDate(dto.getDate());
+		entity.setImgUrl(dto.getImgUrl());
+		entity.setPrice(dto.getPrice());
+		
+		entity.getCategories().clear();
+		for (CategoryDTO catDto : dto.getCategories()) {
+			Category category = categoryRepository.getOne(catDto.getId());
+			entity.getCategories().add(category);
+		}
+		
 	}
 	
 }
