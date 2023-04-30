@@ -2,12 +2,16 @@ package com.jdsjara.dscatalog.dto;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotBlank;
+
 import com.jdsjara.dscatalog.entities.Category;
 
 public class CategoryDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
+	
+	@NotBlank(message = "Campo requerido")
 	private String name;
 	
 	public CategoryDTO() {
