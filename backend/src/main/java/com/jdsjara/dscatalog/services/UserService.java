@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.jdsjara.dscatalog.dto.RoleDTO;
 import com.jdsjara.dscatalog.dto.UserDTO;
 import com.jdsjara.dscatalog.dto.UserInsertDTO;
+import com.jdsjara.dscatalog.dto.UserUpdateDTO;
 import com.jdsjara.dscatalog.entities.Role;
 import com.jdsjara.dscatalog.entities.User;
 import com.jdsjara.dscatalog.repositories.RoleRepository;
@@ -58,7 +59,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserDTO update(Long id, UserDTO dto) {
+	public UserDTO update(Long id, UserUpdateDTO dto) {
 		/*
 		Em versões mais recentes do Spring Boot, o nome da função mudou para: getReferenceById
 		Esse comando não realiza consulta no BD, ele instancia um objeto com os dados que serão
