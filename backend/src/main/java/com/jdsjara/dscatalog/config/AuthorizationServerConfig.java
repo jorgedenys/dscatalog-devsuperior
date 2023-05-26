@@ -1,6 +1,7 @@
 package com.jdsjara.dscatalog.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,15 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
+	@Value("${security.oauth2.client.client-id}")
+	private String clientId;
+	
+	@Value("${security.oauth2.client.client-secret}")
+	private String clientSecret;
+	
+	@Value("${jwt.duration}")
+	private Integer jwtDuration;
+	
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
 	
@@ -37,23 +47,23 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		/*
 		 clients.inMemory() -> O processo será feito em memória
-		 .withClient("dscatalog") -> Definir o client Id. O nome da aplicação, O ID dela.
-		 .secret(passwordEncoder.encode("dscatalog123")) -> Senha da aplicação 
-		 													(não a senha do usuário) 
-		 													deve estar encriptada
+		 .withClient(clientId) -> Definir o client Id. O nome da aplicação, O ID dela.
+		 .secret(passwordEncoder.encode(clientSecret)) -> Senha da aplicação 
+		 											      (não a senha do usuário) 
+		 												  deve estar encriptada
 		 .scopes("read", "write") -> Concedendo escopo de leitura e escrita
 		 .authorizedGrantTypes("password") -> tipo de autorização por senha
 		 									  padrão do OAUTH 
-		 .accessTokenValiditySeconds(86400); -> tempo de expiração do Token em segundos.
-		 									    No caso do parâmetro será a expiração de 1 dia
+		 .accessTokenValiditySeconds(jwtDuration); -> tempo de expiração do Token em segundos.
+		 									          No caso do parâmetro será a expiração de 1 dia
 		 
 		 */
 		clients.inMemory()
-		.withClient("dscatalog")
-		.secret(passwordEncoder.encode("dscatalog123"))
+		.withClient(clientId)
+		.secret(passwordEncoder.encode(clientSecret))
 		.scopes("read", "write")
 		.authorizedGrantTypes("password")
-		.accessTokenValiditySeconds(86400);
+		.accessTokenValiditySeconds(jwtDuration);
 	}
 
 	@Override
@@ -62,5 +72,5 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		.tokenStore(tokerStore)
 		.accessTokenConverter(accessTokenConverter);
 	}
-
+	
 }
