@@ -1,0 +1,66 @@
+package com.jdsjara.dscatalog.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+@Configuration
+@EnableAuthorizationServer
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private JwtAccessTokenConverter accessTokenConverter;
+	
+	@Autowired
+	private JwtTokenStore tokerStore;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Override
+	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+		security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
+	}
+
+	@Override
+	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+		/*
+		 clients.inMemory() -> O processo será feito em memória
+		 .withClient("dscatalog") -> Definir o client Id. O nome da aplicação, O ID dela.
+		 .secret(passwordEncoder.encode("dscatalog123")) -> Senha da aplicação 
+		 													(não a senha do usuário) 
+		 													deve estar encriptada
+		 .scopes("read", "write") -> Concedendo escopo de leitura e escrita
+		 .authorizedGrantTypes("password") -> tipo de autorização por senha
+		 									  padrão do OAUTH 
+		 .accessTokenValiditySeconds(86400); -> tempo de expiração do Token em segundos.
+		 									    No caso do parâmetro será a expiração de 1 dia
+		 
+		 */
+		clients.inMemory()
+		.withClient("dscatalog")
+		.secret(passwordEncoder.encode("dscatalog123"))
+		.scopes("read", "write")
+		.authorizedGrantTypes("password")
+		.accessTokenValiditySeconds(86400);
+	}
+
+	@Override
+	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+		endpoints.authenticationManager(authenticationManager)
+		.tokenStore(tokerStore)
+		.accessTokenConverter(accessTokenConverter);
+	}
+
+}
