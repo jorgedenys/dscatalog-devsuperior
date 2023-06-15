@@ -1,7 +1,10 @@
 package com.jdsjara.dscatalog.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -13,6 +16,9 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @EnableResourceServer
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
+	@Autowired
+	private Environment enviroment;
+	
 	@Autowired
 	private JwtTokenStore tokenStore;
 	
@@ -29,11 +35,6 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 	
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		// H2
-//		if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
-//			http.headers().frameOptions().disable();
-//		}
-		
 		/*
 		// CONFIGURAR AS AUTORIZAÇÕES DAS REQUISIÇÕES
 		http.authorizeRequests()
@@ -56,6 +57,12 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 		// DEVERÁ ESTAR LOGADO (AUTENTICADO)
 		.anyRequest().authenticated();
 		*/
+		
+		// Se dos PROFILES ativos estiver o profile de teste,
+		// poderá ter acesso aos frames do H2 CONSOLE
+		//if (Arrays.asList(enviroment.getActiveProfiles()).contains("test")) {
+			http.headers().frameOptions().disable();
+		//}
 		
 		http.authorizeRequests()
 		.antMatchers(PUBLIC).permitAll()
